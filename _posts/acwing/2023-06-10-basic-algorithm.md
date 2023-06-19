@@ -282,8 +282,9 @@ int main(){
 > - 同上，遇到题目先想象使用暴力循环的方式怎么做，然后再在次基础上深挖某种单调的性质，去优化从O(n^2^)到O(n)的优化。
 > - 双指针常用两种场景：用两个指针指向同一个数组进行遍历(最常见)；用两个指针分别指向两个数组进行遍历。
 - 模板：
-> - 模板是一个架构，常用的场景有：拆分已空格分割的单词并输出；最长连续不重复子序列;
-> - 根据不同场景有所不同，架构如下：
+> - 常用双指针的场景有：拆分已空格分割的单词并输出；最长连续不重复子序列;
+> - 根据不同场景有所不同，架构如下。
+> - 模板中每次都是while(j<i && ...)是因为，需要在已经遍历的部分找性质；且对于已遍历部分每次也不是从0开始，而是从上一次找到性质的地方继续找。
 ```
 总体架构：
 for(int i = 0, j = 0; i < n; i++){
@@ -328,26 +329,73 @@ int main(){
 # 离散化
 - 思想:
 > - 只对整数，保序离散化。
-> - 应用于数组中数值大小较大，但是数组中数据个数较小的情况。即数据分布非常稀疏。
+> - 应用于数组中数值值域较大，但是数组中数据个数较少的情况。即数据分布非常稀疏。
 > - 将数据排序、去重，映射到从1开始的连续自然数即可。(之所以从1开始，是可以继续使用前缀和的方法。)
 - 模板
 
 ```
-vector<int> alls; // 存储所有待离散化的值
-sort(alls.begin(), alls.end()); // 将所有值排序
-alls.erase(unique(alls.begin(), alls.end()), alls.end());   // 去掉重复元素
+#include <iostream>
+#include <vector>
+#include <algorithm>
 
-// 二分求出x对应的离散化的值
-int find(int x) // 找到第一个大于等于x的位置
-{
-    int l = 0, r = alls.size() - 1;
-    while (l < r)
-    {
-        int mid = l + r >> 1;
-        if (alls[mid] >= x) r = mid;
-        else l = mid + 1;
+using namespace std;
+
+typedef pair<int, int> PII;
+
+const int N=3*1e5 + 10;
+int a[N], s[N];
+vector<int> all;
+vector<PII> add, query;
+
+//idx begins from 1
+int find_idx(int x){
+    int l=0, r=all.size()-1;
+    while(l<r){
+        int mid = l+r>>1;
+        if(all[mid] >= x)r=mid;
+        else l=mid+1;
     }
-    return r + 1; // 映射到1, 2, ...n
+    return l+1;
+}
+
+int main(){
+    //1. input info
+    int n,m;
+    cin >> n >> m;
+    for(int i=0; i<n; i++){
+        int x,c;
+        cin >> x >> c;
+        add.emplace_back(x,c);
+        all.push_back(x);
+    }
+    
+    for(int i=0; i<m; i++){
+        int l,r;
+        cin >> l >> r;
+        query.emplace_back(l,r);
+        all.push_back(l);
+        all.push_back(r);
+    }
+    
+    //2. index discretized
+    sort(all.begin(), all.end());
+    all.erase(unique(all.begin(), all.end()), all.end());
+    
+    //3. add
+    for(auto&[x,c] : add){
+        int idx = find_idx(x);
+        a[idx] += c;
+    }
+    
+    //4. cumpute pre add and query
+    for(int i=1; i<=all.size(); i++)s[i]=s[i-1]+a[i];
+    for(auto&[l,r] : query){
+        int l_idx = find_idx(l);
+        int r_idx = find_idx(r);
+        cout << s[r_idx] - s[l_idx - 1] << endl;
+    }
+    
+    return 0;
 }
 ```
 
