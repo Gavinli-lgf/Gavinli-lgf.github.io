@@ -331,7 +331,7 @@ int main(){
 > - 只对整数，保序离散化。
 > - 应用于数组中数值值域较大，但是数组中数据个数较少的情况。即数据分布非常稀疏。
 > - 将数据排序、去重，映射到从1开始的连续自然数即可。(之所以从1开始，是可以继续使用前缀和的方法。)
-- 模板
+- 模板:
 
 ```
 #include <iostream>
@@ -399,6 +399,64 @@ int main(){
 }
 ```
 
+# 区间合并
+- 思路：
+> - 先将区间[st, ed]按照st从小到大进行排序；
+> - 再使用贪心算法，维护一个当前合并区间，每遍历下一个区间时，可能与当前合并区间相交的，就直接合并；不相交的，就更新新的当前合并区间。
+- 模板：
+
+```
+#include <iostream>
+#include <algorithm>
+#include <vector>
+
+using namespace std;
+
+typedef pair<int, int> PII;
+const int N = 1e5+10;
+vector<PII> segs;
+
+void merge_segs(vector<PII>& segs){
+    vector<PII> res;
+    //1. def current merged segs
+    int cur_st=-2e9, cur_ed=-2e9;
+    //2. iterate over segs
+    for(auto&[st, ed]:segs){
+        if(st > cur_ed){
+            //2.1 start new current merged segs
+            if(cur_st != -2e9){
+                res.emplace_back(cur_st, cur_ed);
+            }
+            cur_st=st, cur_ed=ed;
+        }else{
+            //2.2 merge segs
+            cur_ed = max(cur_ed, ed);
+        }
+    }
+    //3. deal the last current merged segs
+    if(cur_st != -2e9){
+        res.emplace_back(cur_st, cur_ed);
+    }
+    segs=res;
+}
+
+int main(){
+    int n;
+    cin >> n;
+    for(int i=0; i<n; i++){
+        int st, ed;
+        cin >> st >> ed;
+        segs.emplace_back(st, ed);
+    }
+    
+    sort(segs.begin(), segs.end());
+    
+    merge_segs(segs);
+    
+    cout << segs.size();
+    return 0;
+}
+```
 
 References
 ----------
