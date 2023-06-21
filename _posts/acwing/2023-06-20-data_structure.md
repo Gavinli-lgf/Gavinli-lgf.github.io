@@ -165,10 +165,30 @@ int main(){
 - 思想：
 > - 数组模拟栈,插入、弹出都在栈尾；
 - 模板：
-> - 属性：2个， stk[N], tt(tail的意思，初始值为0，每次插入前先++，即从1开始存储，这样方便判断是否为空)
+> - 属性：2个， stk[N], tt(tail的意思，初始值为0，每次插入前先++，即从1开始存储。好处很多：方便判断是否为空；即使栈为空是调用query操作，不会导致内存错误。)
 > - 操作：4个，插入、弹出、访问栈顶元素、判断栈是否为空。
-- [习题]()
+- [习题](https://www.acwing.com/problem/content/830/)
 
+```
+const int N=1e5+10;
+int stk[N], tt=0;
+
+void push(int x){
+    stk[++tt]=x;
+}
+
+void pop(){
+    tt--;
+}
+
+bool empty(){
+    return tt<=0;
+}
+
+int query(){
+    return stk[tt];
+}
+```
 
 ## 队列
 - 思想：
