@@ -91,15 +91,71 @@ int main(){
 > - 数组模拟链表，而非struct；数组模拟链表可以实现指针实现链表的所有操作；(静态链表)
 > - 用途:用于实现某些问题的优化；
 - 模板：
-> - 属性：相比单链表多了左向指针与尾序号2个属性。实际用4个属性，是因为有2个属性head,tail默认放在0,1位置了：e[N]存储值,l[N]存储左侧下一个节点序号，r[N]存储右侧下一个节点序号，idx存储当前用到的点的序号；两个数组用下标关联起来；空节点用序号-1表示;
+> - 属性：相比单链表多了左向指针与尾序号2个属性。实际用4个属性，是因为有2个属性head,tail默认放在0,1位置了：e[N]存储值,l[N]存储左侧下一个节点序号，r[N]存储右侧下一个节点序号，idx存储当前用到的点的序号；两个数组用下标关联起来；链表结尾用序号1表示（而非-1）;
 > - 操作：init，add，remove；
-> - init操作总共3步：头尾互指，当前待使用位置；
-> - add操作总共5步：新建节点，新建2条指向关系，该变2条指向关系；在k的左边/右边插入是同等操作，只需实现1个即可；
+> - init操作总共3步：头尾互指，当前待使用位置idx；
+> - add操作总共6步：新建节点，新建2条指向关系，该变2条指向关系,idx++；在k的左边/右边插入是同等操作，只需实现1个即可；
 > - remove操作总共2步：让k的左右两点互指即可；
+> - 第一次插入的位置是2，所以第k次插入的位置是k+1;(不同于单链表的k-1)
+> - 只实现向k右侧的insert操作，那么向头节点插入是insert(0,x);向尾节点插入是insert(l[1],x);向k左侧插入是insert(l[k+1],x);向k右侧插入是insert(k+1,x)。
 - [习题](https://www.acwing.com/problem/content/829/)
 
 ```
+#include <iostream>
 
+using namespace std;
+
+const int N=1e5+10;
+int e[N], l[N], r[N], idx;
+
+void init(){
+    r[0]=1; l[1]=0; idx=2;
+}
+
+//insert to right k
+void insert(int k, int x){
+    e[idx] = x; l[idx] = k; r[idx] = r[k]; l[r[k]] = idx; r[k] = idx++;
+}
+
+void remove(int k){
+    l[r[k]] = l[k]; r[l[k]] = r[k];
+}
+
+int main(){
+    init();
+    int m;
+    cin >> m;
+    while(m--){
+        string op;
+        cin >> op;
+        int k,x;
+        if("L" == op){
+            cin >> x;
+            insert(0, x);
+	    //insert head is add to right side of 0;
+        }else if("R" == op){
+            cin >> x;
+            insert(l[1], x);
+	    //insert tail is add to right side of l[1];
+        }else if("IL" == op){
+            cin >> k >> x;
+            insert(l[k+1], x);
+	    //is l[k+1],not add(k,x)
+        }else if("IR" == op){
+            cin >> k >> x;
+            insert(k+1, x);
+	    //first insert idx is 2, so k+1(different from single list)
+        }else if("D" == op){
+            cin >> k;
+            remove(k+1);
+        }
+    }
+    for(int i=r[0]; i!=1; i=r[i]){
+        //the end of double list is not -1, is 1.
+        cout << e[i] << ' ';
+    }
+    return 0;
+}
 ```
 
 References
