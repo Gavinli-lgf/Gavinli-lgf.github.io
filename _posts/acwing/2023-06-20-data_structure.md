@@ -14,6 +14,8 @@ tags:
 # 基础知识：
 - 如果在switch() case:的多个case中，定义同名变量，编译会报错；但是如果在并列的if()else if()else if()中分别定义同名变量，编译是不会报错的。
 - 注意在cout或cin中使用表达式的方式，要将表达式整体加上括号：cout << empty()?"YES":"NO" << endl;会报错，但是cout << (empty()?"YES":"NO") << endl;不会。
+- 为了有效过滤掉输入字符串末尾的无效字符，使用如下输入方式：char op[2], str[N]; scanf("%s%s", op, str);
+- char数组s,p可以采用如下的输入方式，从1开始存储；但是int数组却不可以：int n, m; char s[M], p[N]; cin >> n >> p + 1 >> m >> s + 1;
 
 
 # 链表：单链表、双链表
@@ -299,6 +301,47 @@ int main(){
     return 0;
 }
 ```
+
+# KMP字符串
+- 在自动驾驶应用中不使用，先不管。
+
+# Trie
+- 思想：
+> - 前缀树或字典树，空节点，用下标0表示。(数组的所有元素默认为0)
+> - 所以只需要维护前缀树的结构关系，与每个节点上出现单词的个数。
+- 模板：
+> - 以字符串为例：所有输入的字符串总长度为N，那么就用数组开辟N个节点；同时每个节点有26个小写英文字母的可能，因此用二维数组son[N][26]表示，第一维序号N表示节点编号，第二维序号表示可能的字母序号。这样就把该树的所有可能性都表示出来了。
+> - 只考虑第1维的情况下，就像使用一维数组表示链表一样，是通过序号表示指针表示连接关系的，并且也需要一个idx来表示下一个可用的节点。默认将所有单词的第1个字符都存储在第0号节点上；而之后的每个单词只要前缀不重复，那么每个字符都会单独占用一个节点；因此idx初始为0，除单词的第1个字符外，其他字符如果需要建立节点，就需要先++idx。
+> - 此外还需要一个数组cnt[N]来记录每个节点作为一个单词结尾的次数。(为了编程方便，cnt可以与son的结尾字符的编号相同，也可以固定错位1个。)
+> - 综上所述：需要3个属性son[N][26], cnt[N], idx；两个操作insert(char str[]), query(char str[])。
+> - 注：遍历一个char str[]表示字符串的方法for(int i=0; str[i]; i++)。
+
+```
+const int N=1e5+10;
+int sun[N][26], cnt[N], idx=0;
+
+void insert(char s[]){
+    int p=0;  //start from root node every time.
+    for(int i=0; s[i]; i++){
+        int u=s[i]-'a';
+        if(!sun[p][u])sun[p][u]=++idx;
+        p=sun[p][u];
+    }
+    cnt[p]++; //num in cnt point to end+1 of s.
+}
+
+int query(char s[]){
+    int p=0;
+    for(int i=0; s[i]; i++){
+        int u=s[i] - 'a';
+        if(!sun[p][u])return 0;
+        p=sun[p][u];
+    }
+    return cnt[p];
+}
+```
+
+
 
 
 References
