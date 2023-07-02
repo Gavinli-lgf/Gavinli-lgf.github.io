@@ -16,6 +16,7 @@ tags:
 - 注意在cout或cin中使用表达式的方式，要将表达式整体加上括号：cout << empty()?"YES":"NO" << endl;会报错，但是cout << (empty()?"YES":"NO") << endl;不会。
 - 为了有效过滤掉输入字符串末尾的无效字符，使用如下输入方式：char op[2], str[N]; scanf("%s%s", op, str);
 - char数组s,p可以采用如下的输入方式，从1开始存储；但是int数组却不可以：int n, m; char s[M], p[N]; cin >> n >> p + 1 >> m >> s + 1;
+- scanf()加%c会读入莫名其妙的回车、空格等莫名其妙的字符。char op[2]; scanf("%s", op);//而使用scanf()加%s的方式读入字符串，可以自动过滤掉行末的空格与回车。
 
 
 # 链表：单链表、双链表
@@ -318,10 +319,10 @@ int main(){
 
 ```
 const int N=1e5+10;
-int sun[N][26], cnt[N], idx=0;
+int sun[N][26], cnt[N], idx=0; //son means point to every son point.
 
 void insert(char s[]){
-    int p=0;  //start from root node every time.
+    int p=0;  //start from root node(0) every time, means parent node
     for(int i=0; s[i]; i++){
         int u=s[i]-'a';
         if(!sun[p][u])sun[p][u]=++idx;
@@ -341,6 +342,201 @@ int query(char s[]){
 }
 ```
 
+# 并查集
+## 原始并查集
+- 思想：
+> - 用途：将两个集合合并； 询问两个元素是否在一个集合当中。
+> - 原理：每一个集合用一棵树表示，数根的编号就是整个集合的编号。两个数组p[N](parent数组) a[N](原始数组)，用序号进行对应；一个数组存储原始值，另一个数组的每个节点存储它的父节点；因此p[x]表示点x的父节点。(如果不关心元素的原始值，只关心联通关系，则只用一个数组P[N]即可。)
+- 模板：
+> - 核心操作1：p[N]的初始化：每个点是一个单独的集合。
+> - 核心操作2：查找根结点的操作int find(int x)；同时进行路径压缩。
+> - 如何判断树根：if(p[x]==x){//就是数根}。
+> - 如何求x的集合编号：find函数的实现if(p[x]!=x)p[x]=find(p[x]); //路径压缩优化(按秩优化效果不大，通常不用。)
+> - 如何合并两个集合：p[find(a)]=find(b);
+- [题目](https://www.acwing.com/problem/content/description/838/)
+
+```
+#include <iostream>
+
+using namespace std;
+
+const int N=1e5+10;
+
+int p[N];
+
+int find(int x){
+    if(p[x]==x)return x;
+    p[x]=find(p[x]);
+}
+
+int main(){
+    int n,m;
+    scanf("%d%d", &n, &m);
+    for(int i=1; i<=n; i++)p[i]=i;
+    
+    char op[2]; int a,b;
+    while(m--){
+        scanf("%s%d%d", op, &a, &b);
+        if('M' == op[0]){
+            p[find(a)] = find(b);
+        }else{
+            if(find(a)==find(b))printf("Yes\n");
+            else printf("No\n");
+        }
+    }
+    return 0;
+}
+```
+
+## 并查集中维护额外的信息
+- 维护每个集合元素的个数；
+> - 新增一个数组size[N]用于维护每个集合点的个数：初始化时每个集合只有1个点；数次操作之后，只有根结点的size个数才有意义。
+- 模板：
+> - 必须想将跟根节点关联的其他信息操作之后，再直行两个集合的合并操作；(如果先合并两个集合，那么两个集合已经合而为一了，再操作两个分集合的信息已经晚 了。)
+- [题目](https://www.acwing.com/problem/content/839/)
+
+```
+#include <iostream>
+
+using namespace std;
+
+const int N=1e5+10;
+int p[N], cnt[N];
+
+int find(int x){
+    if(p[x]==x)return x;
+    p[x]=find(p[x]);
+}
+
+int main(){
+    int n,m;
+    scanf("%d%d", &n, &m);
+    for(int i=1; i<=n; i++){
+        p[i]=i; cnt[i]=1;
+    }
+    
+    char op[3]; int a, b;
+    while(m--){
+        scanf("%s%d%d", op, &a, &b);
+        if('C'==op[0]){
+            if(a==b || find(a)==find(b))continue;
+            cnt[find(b)] += cnt[find(a)];//must carry out size increase,then connect two set
+            p[find(a)] = find(b);
+        }else if('1'==op[1]){
+            if(a==b || find(a) == find(b)){
+                printf("Yes\n");
+                continue;
+            }
+            printf("No\n");
+        }else{
+            printf("%d\n", cnt[find(a)]);
+        }
+    }
+    return 0;
+}
+```
+
+# 堆(优先队列)
+- 思想：
+> - 完全二叉树
+> - 完全二叉树可以用一个一维数组表示，下标为1的点为根结点，则x的左儿子为2x，右儿子为2x+1;
+> - 
+- 模板：
+> - 建堆方法(O(n)的方法)：for(int i=n/2; i; i--)down(i);
+> - 5个方法(比stl多后2个)：1.插入一个数； 2.求集合当中的最小值； 3.删除最小值； 4.删除任意一个元素； 5.修改任意一个元素。
+> - 上述5个方法都可以用最根本的2个操作组合而成：up(x); down(x)。（up只需要与父节点比较；down需要同时比较两个子节点。）
+> - 1.插入一个数：heap[++size]=x; up(size);
+> - 2.求集合当中最小值：heap[1];
+> - 3.删除最小值：heap[1]=heap[size]; size--; down(1);
+> - 4.删除任意一个元素：heap[k]=heap[size]; size--; down(k); up(k);
+> - 5.修改任意一个元素：heap[k]=x; down(k); up(k);
+
+```
+#include <iostream>
+#include <algorithm>
+#include <string.h>
+
+using namespace std;
+
+const int N = 100010;
+
+int h[N], ph[N], hp[N], cnt;
+
+void heap_swap(int a, int b)
+{
+    swap(ph[hp[a]],ph[hp[b]]);
+    swap(hp[a], hp[b]);
+    swap(h[a], h[b]);
+}
+
+void down(int u)
+{
+    int t = u;
+    if (u * 2 <= cnt && h[u * 2] < h[t]) t = u * 2;
+    if (u * 2 + 1 <= cnt && h[u * 2 + 1] < h[t]) t = u * 2 + 1;
+    if (u != t)
+    {
+        heap_swap(u, t);
+        down(t);
+    }
+}
+
+void up(int u)
+{
+    while (u / 2 && h[u] < h[u / 2])
+    {
+        heap_swap(u, u / 2);
+        u >>= 1;
+    }
+}
+
+int main()
+{
+    int n, m = 0;
+    scanf("%d", &n);
+    while (n -- )
+    {
+        char op[5];
+        int k, x;
+        scanf("%s", op);
+        if (!strcmp(op, "I"))
+        {
+            scanf("%d", &x);
+            cnt ++ ;
+            m ++ ;
+            ph[m] = cnt, hp[cnt] = m;
+            h[cnt] = x;
+            up(cnt);
+        }
+        else if (!strcmp(op, "PM")) printf("%d\n", h[1]);
+        else if (!strcmp(op, "DM"))
+        {
+            heap_swap(1, cnt);
+            cnt -- ;
+            down(1);
+        }
+        else if (!strcmp(op, "D"))
+        {
+            scanf("%d", &k);
+            k = ph[k];
+            heap_swap(k, cnt);
+            cnt -- ;
+            up(k);
+            down(k);
+        }
+        else
+        {
+            scanf("%d%d", &k, &x);
+            k = ph[k];
+            h[k] = x;
+            up(k);
+            down(k);
+        }
+    }
+
+    return 0;
+}
+```
 
 
 
