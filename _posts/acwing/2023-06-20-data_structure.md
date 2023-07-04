@@ -539,7 +539,6 @@ int main()
 ```
 
 
-
 References
 ----------
 
