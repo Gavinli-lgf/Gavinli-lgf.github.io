@@ -65,6 +65,29 @@ tags:
 - [图中点的层次](https://www.acwing.com/problem/content/849/)
 
 ```
+//树的存储
+// 对于每个点k，开一个单链表，存储k所有可以走到的点。h[k]存储这个单链表的头结点
+// h,e,ne,idx共4种对象7种值中：只有h数组的序号、e[]中的值，这2者表示真实的点标号；h[]中的值、e数组的序号、ne[]中的值、ne数组的序号、idx的值，这5者表示的序号与点的序号无关。
+int h[N], e[N], ne[N], idx;
+
+// 添加一条边a->b
+void add(int a, int b)
+{
+    e[idx] = b, ne[idx] = h[a], h[a] = idx ++ ;
+}
+
+// 初始化
+idx = 0;
+memset(h, -1, sizeof h);
+
+//遍历
+for (int i = h[t]; i != -1; i = ne[i])
+{
+    int j = e[i];
+}
+```
+
+```
 //深度优先遍历
 int dfs(int u)
 {
@@ -76,7 +99,9 @@ int dfs(int u)
         if (!st[j]) dfs(j);
     }
 }
+```
 
+```
 //宽度优先遍历
 queue<int> q;
 st[1] = true; // 表示1号点已经被遍历过
