@@ -13,6 +13,8 @@ tags:
 
 # 基础知识：
 - 输入数据规模大于1e6时，才必须用scanf；小于时用cin或scanf都一样。 
+- 1e6前面的数字可以是小数，如1.5e6
+- memset()头文件，string.h或者cstring
 
 # 概要：
 > - 1.DFS:stack O(h)   无最短路性质   回溯，剪枝
